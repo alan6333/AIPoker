@@ -17,7 +17,7 @@ def shuffle_card_deck(card_deck):
     #for every card
     for card in card_deck:
         #get random index
-        randomIndex = random.randrange(51)
+        randomIndex = random.randrange(52)
         #if index is not taken, put the card there
         if (shuffle_card_deck[randomIndex]==0):
             shuffle_card_deck[randomIndex] = card
@@ -33,10 +33,10 @@ def shuffle_card_deck(card_deck):
                 if (shuffle_card_deck[randomIndex]==0):
                     shuffle_card_deck[randomIndex] = card
                     break
-    ia = 0
+    i = 0
     for card in shuffle_card_deck:
-        print(str(ia) + ' ' + str(shuffle_card_deck[ia].suit) + str(shuffle_card_deck[ia].number))
-        ia = ia + 1
+        print(str(i) + ' ' + str(shuffle_card_deck[i].suit) + str(shuffle_card_deck[i].number))
+        i = i + 1
 
     return shuffle_card_deck
 
