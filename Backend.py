@@ -22,6 +22,7 @@ class GameModel():
        self.gamemode = "AI" # default vs AI
        self.game_state = "start" 
        self.utg = "Undecided"
+       self.second_better = "Undecided"
        self.p1 = Player()
        self.p2 = Player()
        self.message_to_user = "Welcome to AI Poker by Alan Coronado"
@@ -48,15 +49,18 @@ class GameModel():
       elif self.game_state == "choose_logistics":
           self.choose_logistics()
 
-      elif self.game_state == "Round 0":
-          self.round0()
+      elif self.game_state[0:8] == "pre_flop": #prefix 'preflop', if gamestate is preflop phase
+          self.pre_flop()
           return
-
+      
       elif self.game_state == " ":
-          print(" ")
+        print(" ")
+
+      elif self.game_state == "leave":
+          self.leave()
       
       else:
-          print("I'm not done yet! QUIT.")
+          print("\n\n\nI'm not done yet! QUIT.")
           quit()
       return 
         
@@ -71,12 +75,14 @@ class GameModel():
       randomNum = random.randrange(2)
       if (randomNum == 0):
          self.p1.blind = "Small"
-         self.utg = "P1"
+         self.utg = self.p1
          self.p2.blind = "Big"
+         self.second_better = self.p2
       else:
          self.p1.blind = "Big"
+         self.second_better = self.p1
          self.p2.blind = "Small"
-         self.utg = "P2"
+         self.utg = self.p2
       return
     
     def deal_2_cards(self, player):
@@ -100,9 +106,38 @@ class GameModel():
           return "Player 1"
         else:
           return "Player 2"
+    
+    def get_utg(self):
+       if(self.utg == self.p1):
+          return "Player 1"
+       elif (self.utg == self.p2):
+          return "Player 2"
+       else:
+          return "UTG is Undecided"
+    
+    def get_second_bet(self):
+       if (self.second_better == self.p1):
+          return "Player 1"
+       elif (self.second_better == self.p2):
+          return "Player 2"
+       else:
+          return "2nd Better is Undecided"
+    
+    def get_player_money(self, player):
+       return player.money
        
+    def get_winner(self):
+       if(self.p1.money > self.p2.money):
+          return "Player 1 is the winner!"
+       elif (self.p2.money < self.p1.money):
+          return "Player 2 is the winner!"
+       else:
+          return "It is a tie!"
     
 #======================================================================================================================
+    def leave(self):
+       quit()
+
     def ask_user_for_gamemode(self):
         self.message_to_user = "Please choose your opponent, type 'AI' or 'Human': "
         self.game_state = "choose_logistics"
@@ -121,27 +156,39 @@ class GameModel():
       if (uinput == "AI"):
           self.message_to_user = "Ready to play against: AI!\n\nThe Dealer is done Shuffling\n\n"\
           + "Big Blind is " + str(self.get_big_blind()) + " and Small Blind is " + str(self.get_small_blind())\
-          + "\nThe dealer is handing out cards!"
+          + "\nThe dealer is handing out cards!\n\n\n\n----==={Pre-Flop Begin}===----\n\n"
           self.gamemode = "AI"
-          self.game_state = "Round0"
+          self.game_state = "pre_flop"
       elif (uinput == "Human"):
           self.message_to_user = "\nReady to play against: AI!\n\nThe Dealer is done shuffling.\n\n"\
           + "Big Blind is " + str(self.get_big_blind()) + " and Small Blind is " + str(self.get_small_blind())\
-          + "\nThe dealer is handing out cards!"
+          + "\nThe dealer is handing out cards!\n\n\n\n----==={Pre-Flop Begin}===----\n\n"
           self.gamemode = "Human"
-          self.game_state = "Round0"
+          self.game_state = "pre_flop"
       else:
           self.message_to_user = "\nInvalid input, try again.\nPlease a VALID opponent, type 'AI' or 'Human': "      
       return
     
 
+    def pre_flop(self):
 
-    # def round0player(self):
-      # choose blinds, small is "under the gun" UTG
+      if (self.game_state == "pre_flop"):
+          self.message_to_user = str(self.get_small_blind()) + " is Under The Gun with $" + str(self.get_player_money(self.utg)) +" dollars.\n" + "Make your bet!\n"\
+          + "Options: 1[Leave] 2[Fold] 2[Check] 3[Bet (amount)]"
+          self.game_state = "pre_flop_utg_bet"
+      elif (self.game_state == "pre_flop_utg_bet"):
+         self.player_bet(self.utg)
 
-      # UTG bets first
-      # big blind goes second
-      # chance to leave
-
-
-
+    
+    def player_bet(self, player):
+      
+      uinput = input()
+      #if player has no money, lose
+      #if player wants to leave, leave
+      if(uinput == str(1)):
+        self.message_to_user = "\n\n\n\n=======================================================================================\n"\
+            + self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+         + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n" + self.get_winner()
+        self.game_state = "leave"
+      #if player wants to fold, fold
+      #if player wants to bet
