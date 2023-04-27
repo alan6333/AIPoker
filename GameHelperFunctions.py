@@ -35,11 +35,9 @@ def shuffle_card_deck(card_deck):
                     break
     i = 0
     for card in shuffle_card_deck:
-        print(str(i) + ' ' + str(shuffle_card_deck[i].suit) + str(shuffle_card_deck[i].number))
         i = i + 1
 
     return shuffle_card_deck
-
 
 def make_card_deck(card_deck):
     card_deck.append(card('hearts', '2', '2'))

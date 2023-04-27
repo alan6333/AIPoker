@@ -14,7 +14,10 @@ controller = Controller(GameModel())
 is_game_started = False
 message = " "
 
-
+#
+#Main loop of the game
+#if 'running' stops then the window closes.
+#
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -47,3 +50,4 @@ while running:
     # dt = clock.tick(60) / 1000
     ##########################################################################################
 pygame.quit()
+

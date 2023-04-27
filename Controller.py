@@ -1,4 +1,7 @@
 
+#
+# This class is the controller which might gatekeep to good inputs and directs to backend
+#
 class Controller(object):
 
     def __init__(self, game):
