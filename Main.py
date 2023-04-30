@@ -20,7 +20,7 @@ message = " "
 #
 while running:
     # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
+    # pygame.QUIT event means the user clickedç X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -30,7 +30,16 @@ while running:
 
     #start game
     if is_game_started == False:
-        controller.start_game()
+        #1 ask for gamemode
+        controller.ask_user_for_gamemode()
+        message = controller.get_message_to_user()
+        print(message)
+        #2 answer to gamemode
+        controller.choose_logistics()
+        message = controller.get_message_to_user()
+        print(message)
+        #3 setup game logistics
+        controller.config_game()
         message = controller.get_message_to_user()
         print(message)
         is_game_started = True
