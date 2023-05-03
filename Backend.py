@@ -115,20 +115,23 @@ class GameModel():
          self.card_deck.pop(randomIndex)
       
     def show_comm_cards(self):
-       self.message_to_user = "\nCommunity deck is: "
+       #preflop
        if(len(self.comm_cards) == 0):
-          self.message_to_user = " "
+          self.message_to_user = "\nPREFLOP ========================================================================"
+       #flop
        elif(len(self.comm_cards) == 3):
-            self.message_to_user = self.message_to_user + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
+            self.message_to_user = "\nFLOP ========================================================================\nCommunity deck is: " + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
                + self.comm_cards[1].suit + "-" + self.comm_cards[1].number + " | "\
                + self.comm_cards[2].suit + "-" + self.comm_cards[2].number + "\n"
+       #turn
        elif(len(self.comm_cards) == 4):
-            self.message_to_user = self.message_to_user + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
+            self.message_to_user = "\nTURN ========================================================================\nCommunity deck is: " + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
             + self.comm_cards[1].suit + "-" + self.comm_cards[1].number + " | "\
             + self.comm_cards[2].suit + "-" + self.comm_cards[2].number + " | "\
             + self.comm_cards[3].suit + "-" + self.comm_cards[3].number + "\n"
+       #river
        else:
-            self.message_to_user = self.message_to_user + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
+            self.message_to_user = "\nRIVER ========================================================================\nCommunity deck is: " + self.comm_cards[0].suit + "-" + self.comm_cards[0].number + " | "\
             + self.comm_cards[1].suit + "-" + self.comm_cards[1].number + " | "\
             + self.comm_cards[2].suit + "-" + self.comm_cards[2].number + " | "\
             + self.comm_cards[3].suit + "-" + self.comm_cards[3].number + " | "\
@@ -236,8 +239,16 @@ class GameModel():
        quit()
     
     def showdown(self):
-       print("\nHand comparer method isn't done yet so no one wins yet.")
+       #reset the round
        self.game_state = "reset round"
+       
+       #showdown the cards and see who wins
+       winner = self.p1 #give pot to a player TODO update to alg not p1
+       self.message_to_user = winner.player_id + " won the round and wins $ " + str(self.pot)\
+           + "." #set message saying player X won
+       winner.money = winner.money + self.pot
+
+       #if everyone is out of money, then end the game. TODO change the message back.
        if (self.p1.money == 0 or self.p2.money == 0):
           self.game_state = "leave"
           
