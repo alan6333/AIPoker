@@ -125,7 +125,7 @@ def get_player_hand(comm_cards, player_cards):
     all_hand_combinations_6 = copy.deepcopy(all_hand_combinations)
     for combo in all_hand_combinations_6:
         combo_copy = copy.deepcopy(combo)
-        if(check_twoapair(combo)):
+        if(check_twopair(combo)):
             all_twopairs.append(["Two Pair", get_hand_strength("Two Pair", combo_copy)])
     if(len(all_twopairs) > 0):
         tpair_winner = all_twopairs[0]
@@ -151,16 +151,19 @@ def get_player_hand(comm_cards, player_cards):
     #HIGHCARD*
     all_highcards = []
     all_hand_combinations_8 = copy.deepcopy(all_hand_combinations)
+    #for every combination
     for combo in all_hand_combinations_8:
+        #set winner
         combo_highcard = combo[0]
+        #loop through current combination
         for card in combo:
-            if(card.value > combo_highcard.value):
+            if(int(card.value) > int(combo_highcard.value)):
                 combo_highcard = card
         all_highcards.append(combo_highcard)
     if(len(all_highcards)>0):
         best_highcard = all_highcards[0]
         for highcard in all_highcards:
-            if(highcard.value > best_highcard.value):
+            if(int(highcard.value) > int(best_highcard.value)):
                 best_highcard = highcard
         return [best_highcard.number, int(best_highcard.value)]
 
@@ -308,16 +311,17 @@ def check_threeofakind(combo):
     else: #no cards had 3, no three of a kind
         return False
     
-def check_twoapair(combo):
+def check_twopair(combo):
+    # A A 2 2 3
     card1 = "N/A"
     card2 = "N/A"
     card3 = "N/A"
     for card in combo:
         if (card1 == "N/A"):
             card1 = card
-        elif (card2 == "N/A"):
+        elif (card2 == "N/A" and card.number != card1.number):
             card2 = card
-        elif (card3 == "N/A"):
+        elif (card3 == "N/A" and card.number != card1.number and card.number != card2.number):
             card3 = card
         elif (card.value == card1.value or card.value == card2.value or card.value == card3.value):
             continue
@@ -326,6 +330,7 @@ def check_twoapair(combo):
     return True
 
 def check_pair(combo):
+    # A K Q J J
     card1 = "N/A"
     card2 = "N/A"
     card3 = "N/A"
@@ -333,11 +338,11 @@ def check_pair(combo):
     for card in combo:
         if (card1 == "N/A"):
             card1 = card
-        elif (card2 == "N/A"):
+        elif (card2 == "N/A" and card.number != card1.number):
             card2 = card
-        elif (card3 == "N/A"):
+        elif (card3 == "N/A" and card.number != card1.number and card.number != card2.number):
             card3 = card
-        elif (card4 == "N/A"):
+        elif (card4 == "N/A" and card.number != card1.number and card.number != card2.number and card.number != card3.number):
             card4 = card
         elif (card.value == card1.value or card.value == card2.value or card.value == card3.value or card.value == card4.value):
             continue
@@ -433,9 +438,8 @@ def get_hand_strength(hand, combo):
             return int(card3.value)
         if(card3_count == card2_count and int(card3.value) > int(card2.value)):
             return int(card3.value)
-        else:
-                print("Something went wrong in get_hand_strength()2 Two Pair")
-                return
+        print("Something went wrong in get_hand_strength()2 Two Pair")
+        return
         
     elif(hand == "Pair"):
         # 1 2 3 4 4
@@ -480,7 +484,7 @@ def get_hand_strength(hand, combo):
         elif(card4_count > card1_count and card4_count > card2_count and card4_count > card3_count):
             return int(card4.value)
         else:
-            print("Something went wrong in get_hand_strength()2 Pair")
+            print("Something went wrong in get_hand_strength() Pair")
             return -1
     else:
         print("Something went wrong in get_hand_strength")
