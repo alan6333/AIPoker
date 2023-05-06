@@ -1,6 +1,6 @@
 from GameHelperFunctions import make_card_deck, shuffle_card_deck, get_player_hand
 import GameHelperFunctions
-import time, random
+import time, random, pygame, sys
 
 #
 # This class makes a Card 'Object'
@@ -30,7 +30,7 @@ class Player:
 #
 class GameModel():
     def __init__(self):
-       self.gamemode = "AI" # default vs AI
+       self.gamemode = "N/A" # default vs AI
        self.game_state = "start" 
        self.pot = 0 #pot of money
        self.utg = "Undecided" #UTG means the player next to the dealer, they always start the bet
@@ -42,6 +42,7 @@ class GameModel():
        self.flop = 0
        self.comm_cards = []
        self.bet = 0
+       self.getting_input = False
 
     #game config method
     def config_game(self):
@@ -67,15 +68,15 @@ class GameModel():
           return
       elif self.game_state[0:7] == "BETTING":
          #bet here
-         self.betting()
+         self.betting("N/A")
          return
 
       elif self.game_state == "leave":
           self.leave()
-
+      elif self.game_state == "quit":
+         quit()
       else:
-          print("\n\n\nI'm not done yet! QUIT.")
-          quit()
+         return
       return 
         
         
@@ -234,11 +235,20 @@ class GameModel():
              self.p1.blind = self.p1.blind[3:]
              self.p2.blind = self.p2.blind[3:]
              return
+         
+    def get_gamestate(self):
+       return self.get_gamestate
        
+    def if_awaiting_input(self):
+       return self.getting_input
 
 #======================================================================================================================
     def leave(self):
-       quit()
+       self.game_state = "quit"
+       self.message_to_user = "\n\n\n\n=======================================================================================\n"\
+         + self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+         + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n" + self.get_winner()
+       return
     
     def showdown(self):
        #if there are not 5 cards in the community deck
@@ -320,9 +330,8 @@ class GameModel():
          + "Please choose your opponent, type 'AI' or 'Human': "
         return
     
-    def choose_logistics(self):
-
-      uinput = input()
+    def choose_logistics(self, uinput):
+      self.gamemode = uinput
       if (uinput == "AI"):
           self.message_to_user = "\n\nReady to play against: AI!\nThe Dealer is done Shuffling\n"\
           + "\n\n\n\n\n\n----==={Pre-Flop Begin}===----\n"
@@ -370,7 +379,7 @@ class GameModel():
        self.game_state = "blinds_bet"
        self.message_to_user = "Round begins...\nDealt two cards to each player.\n"
 
-    def betting(self):
+    def betting(self, input):
       #SHOW X COMMUNITY CARDS
       if (self.game_state == "BETTING_show_comm_cards_utg"):
          if (self.flop == 0): #Preflop
@@ -415,7 +424,12 @@ class GameModel():
          self.show_player_hand(self.utg)
          return
       if (self.game_state == "BETTING_betUTG"):
-         self.utg_bet()
+         if(self.getting_input == False):
+
+            self.getting_input = True
+            return
+         self.utg_bet(input)
+         self.getting_input = False
          return
       #Second Better
       if (self.game_state == "BETTING_warn_show2nd_cards"): #Human
@@ -428,7 +442,12 @@ class GameModel():
          self.show_player_hand(self.second_better)
          return
       if (self.game_state == "BETTING_bet2nd"):
-         self.second_bet()
+         if(self.getting_input == False):
+
+            self.getting_input = True
+            return
+         self.second_bet(input)
+         self.getting_input = False
          return
       #Apply Winner
       if (self.game_state == "BETTING_Showdown"):
@@ -440,8 +459,8 @@ class GameModel():
       self.message_to_user =  self.show_player_hand(player) + "\n\nMake your bet!\n"\
           + "Options: 1[Leave] 2[Fold] 3[Check] 4[Bet (amount)]\n"
 
-    def utg_bet(self):
-      uinput = input()
+    def utg_bet(self, uinput):
+      uinput ="-1"
       #if player wants to leave, leave
       if(uinput == str(1)):
         self.message_to_user = "\n\n\n\n=======================================================================================\n"\
@@ -540,8 +559,7 @@ class GameModel():
                self.game_state = "BETTING_show2nd_cards"
          return
 
-    def second_bet(self):
-      uinput = input()
+    def second_bet(self, uinput):
       #if player has no money, lose or all in 
 
       #if player wants to leave, leave

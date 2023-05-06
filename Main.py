@@ -1,32 +1,99 @@
 # Example file showing a circle moving on screen
-import pygame
+import pygame, sys
 from Controller import Controller
 from Backend import GameModel
 
-# pygame setup
+class Button:
+    def __init__(self, text, width, height, pos, type):
+        #core attribs
+        self.pressed = False
+        self.type = type
+        #top rectangle
+        self.top_rect = pygame.Rect(pos, (width,height)) 
+        self.top_color = "#475F77"
+        
+        #text
+        self.text_surf = gui_font.render(text, True, "#FFFFFF")
+        self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
+
+    def draw(self):
+        pygame.draw.rect(screen, self.top_color, self.top_rect)
+        screen.blit(self.text_surf, self.text_rect)
+        self.check_click()
+
+    def check_click(self):
+        mouse_pos = pygame.mouse.get_pos()
+        #if hovering button
+        if (self.top_rect.collidepoint(mouse_pos)):
+            #TODO change stuff here when hovering
+            #status of mouse being clicked
+            #if mouse is being clicked
+            if pygame.mouse.get_pressed()[0]:
+                self.pressed = True
+            #if player is not pressing button anymore (released)
+            else:
+                #if button was pressed in the first place
+                if (self.pressed == True):
+                    if(self.type == "Gamemode"):
+                        controller.choose_logistics("Human")
+                        message = controller.get_message_to_user()
+                        print(message)
+                        #TODO might have to put a wait here
+                        controller.config_game()
+                        message = controller.get_message_to_user()
+                        print(message)
+                        self.pressed == False
+
+                    if(self.type == "Leave"):
+                        controller.leave()
+                        message = controller.get_message_to_user()
+                        print(message)
+                        return
+                    if(self.type == "Betting"):
+                        controller.betting(input)
+                        message = controller.get_message_to_user()
+                        print(message)
+                        return
+
+        #if mouse isn't hovering the button anymore
+        else:
+            #TODO change button animation back when not hovering anymore
+            return
+
+
+# PYGAME setup
 pygame.init()
 pygame.display.set_caption('AI Poker')
-screen = pygame.display.set_mode((1280, 720)) #1920x1080
+screen = pygame.display.set_mode((1280, 960)) #1920x1080 or 3072x2304
 clock = pygame.time.Clock()
+gui_font = pygame.font.Font(None, 30)
 running = True
 dt = 0
 controller = Controller(GameModel())
-is_game_started = False
-message = " "
-
+#====================================================
+is_game_started = False #has game started?
+message = " " #message
+bg = pygame.image.load('./images/bg.jpg') #LOAD background
+bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
+all_buttons = []
+all_buttons.append(Button('AI', 200, 60, (793,450), "Gamemode"))
+all_buttons.append(Button('Human', 200, 60, (396,450), "Gamemode"))
+all_buttons.append(Button('Leave', 200, 60, (0,0), "Leave"))
+all_buttons.append(Button('Fold', 200, 60, (540,900), "Betting"))
+all_buttons.append(Button('Check', 200, 60, (760,900), "Betting"))
+# all_buttons.append(Button('Bet', 200, 60, (0,0), "Betting"))
 #
 #Main loop of the game
 #if 'running' stops then the window closes.
 #
 while running:
-    # poll for events
+    #place bg on screen
+    screen.blit(bg, (0,0)) #places image onto screen
+
     # pygame.QUIT event means the user clickedç X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("brown")
 
     #start game
     if is_game_started == False:
@@ -34,25 +101,26 @@ while running:
         controller.ask_user_for_gamemode()
         message = controller.get_message_to_user()
         print(message)
-        #2 answer to gamemode
-        controller.choose_logistics()
-        message = controller.get_message_to_user()
-        print(message)
-        #3 setup game logistics
-        controller.config_game()
-        message = controller.get_message_to_user()
-        print(message)
         is_game_started = True
-
-    controller.progress_game()    
-    message = controller.get_message_to_user()
-    print(message)
-    
+    #if gamemode isn't choosen yet
+    if(controller.get_gamemode() == "N/A"):
+        all_buttons[0].draw() #ai
+        all_buttons[1].draw() #human
+    #if game has started progress game
+    if(controller.get_gamestate != "start" and controller.get_gamemode() != "N/A"):
+        controller.progress_game()    
+        message = controller.get_message_to_user()
+        print(message)
+        all_buttons[2].draw()
+        all_buttons[3].draw()
+        all_buttons[4].draw()
+    if(controller.if_awaiting_input()):
+        print("awaiting input")
 
     ##########################################################################################
     # flip() the display to put your work on screen
     pygame.display.flip()
-
+    pygame.display.update()
     # limits FPS to 60
     # dt is delta time in seconds since last frame, used for framerate-
     # independent physics.
