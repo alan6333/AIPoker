@@ -1,5 +1,6 @@
 # Example file showing a circle moving on screen
 import pygame, sys
+import ptext
 from Controller import Controller
 from Backend import GameModel
 
@@ -60,9 +61,40 @@ class Button:
             #TODO change button animation back when not hovering anymore
             return
 
+def blit_text(surface, text, pos, font, color=pygame.Color('black')):
+    words = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
+    space = font.size(' ')[0]  # The width of a space.
+    max_width, max_height = surface.get_size()
+    x, y = pos
+    for line in words:
+        for word in line:
+            word_surface = font.render(word, 0, color)
+            word_width, word_height = word_surface.get_size()
+            if x + word_width >= max_width:
+                x = pos[0]  # Reset the x.
+                y += word_height  # Start on new row.
+            surface.blit(word_surface, (x, y))
+            x += word_width + space
+        x = pos[0]  # Reset the x.
+        y += word_height  # Start on new row.
 
 # PYGAME setup
 pygame.init()
+def box_text(surface, font, x_start, x_end, y_start, text, colour):
+    x = x_start
+    y = y_start
+    words = text.split(' ')
+
+    for word in words:
+        word_t = font.render(word, True, colour)
+        if word_t.get_width() + x <= x_end:
+            surface.blit(word_t, (x, y))
+            x += word_t.get_width() * 1.1
+        else:
+            y += word_t.get_height() * 1.1
+            x = x_start
+            surface.blit(word_t, (x, y))
+            x += word_t.get_width() * 1.1
 pygame.display.set_caption('AI Poker')
 screen = pygame.display.set_mode((1280, 960)) #1920x1080 or 3072x2304
 clock = pygame.time.Clock()
@@ -75,6 +107,8 @@ is_game_started = False #has game started?
 message = " " #message
 bg = pygame.image.load('./images/bg.jpg') #LOAD background
 bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
+base_font = pygame.font.Font(None, 32)
+
 all_buttons = []
 all_buttons.append(Button('AI', 200, 60, (793,450), "Gamemode"))
 all_buttons.append(Button('Human', 200, 60, (396,450), "Gamemode"))
@@ -90,6 +124,10 @@ while running:
     #place bg on screen
     screen.blit(bg, (0,0)) #places image onto screen
 
+    text_surface = base_font.render(message, True, (255, 255, 255))
+    # screen.blit(text_surface, (210,0))
+    # blit_text(text_surface, message, (210, 0), pygame.font.SysFont('Arial', 64))
+    ptext.draw(message, (0, 850), color=pygame.Color('black'), background="white")
     # pygame.QUIT event means the user clickedç X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -116,7 +154,6 @@ while running:
         all_buttons[4].draw()
     if(controller.if_awaiting_input()):
         print("awaiting input")
-
     ##########################################################################################
     # flip() the display to put your work on screen
     pygame.display.flip()
@@ -127,4 +164,3 @@ while running:
     # dt = clock.tick(60) / 1000
     ##########################################################################################
 pygame.quit()
-

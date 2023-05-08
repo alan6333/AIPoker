@@ -325,9 +325,8 @@ class GameModel():
           return 1
 
     def ask_user_for_gamemode(self):
-        self.message_to_user = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"\
-          + "Welcome to AI Poker by Alan Coronado\nThe dealer is shuffling cards...\n\n" \
-         + "Please choose your opponent, type 'AI' or 'Human': "
+        self.message_to_user = "Welcome to AI Poker by Alan Coronado\nThe dealer is shuffling cards...\n\n" \
+         + "Please choose your opponent! "
         return
     
     def choose_logistics(self, uinput):
