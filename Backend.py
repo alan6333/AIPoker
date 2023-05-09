@@ -241,7 +241,32 @@ class GameModel():
        
     def if_awaiting_input(self):
        return self.getting_input
+    
+    def get_flop(self):
+       flop = "Preflop"
+       #preflop
+       if(len(self.comm_cards) == 0):
+          flop = "Preflop"
+       #flop
+       elif(len(self.comm_cards) == 3):
+            flop = "Flop"
+       #turn
+       elif(len(self.comm_cards) == 4):
+            flop = "Turn"
+       #river
+       else:
+            flop = "River"
+       return flop
 
+    def get_pot(self):
+       return self.pot
+    
+    def get_player_cash(self, player):
+       if(player == "p1"):
+          return self.p1.money
+       else:
+          return self.p2.money
+       
 #======================================================================================================================
     def leave(self):
        self.game_state = "quit"

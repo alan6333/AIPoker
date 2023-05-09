@@ -39,3 +39,12 @@ class Controller(object):
         def leave(self):
                 self.game.leave()
                 return
+        
+        def get_flop(self):
+                return self.game.get_flop()
+        
+        def get_pot(self):
+                return self.game.get_pot()
+        
+        def get_player_money(self, player):
+                return self.game.get_player_cash(player)

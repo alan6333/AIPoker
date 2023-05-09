@@ -1,5 +1,5 @@
 # Example file showing a circle moving on screen
-import pygame, sys
+import pygame, sys, time
 import ptext
 from Controller import Controller
 from Backend import GameModel
@@ -11,7 +11,7 @@ class Button:
         self.type = type
         #top rectangle
         self.top_rect = pygame.Rect(pos, (width,height)) 
-        self.top_color = "#475F77"
+        self.top_color = "#CCE3DE"
         
         #text
         self.text_surf = gui_font.render(text, True, "#FFFFFF")
@@ -26,6 +26,7 @@ class Button:
         mouse_pos = pygame.mouse.get_pos()
         #if hovering button
         if (self.top_rect.collidepoint(mouse_pos)):
+            self.top_color = "#A4C3B2"
             #TODO change stuff here when hovering
             #status of mouse being clicked
             #if mouse is being clicked
@@ -34,12 +35,12 @@ class Button:
             #if player is not pressing button anymore (released)
             else:
                 #if button was pressed in the first place
+                self.top_color = "#6B9080"
                 if (self.pressed == True):
                     if(self.type == "Gamemode"):
                         controller.choose_logistics("Human")
                         message = controller.get_message_to_user()
                         print(message)
-                        #TODO might have to put a wait here
                         controller.config_game()
                         message = controller.get_message_to_user()
                         print(message)
@@ -58,45 +59,36 @@ class Button:
 
         #if mouse isn't hovering the button anymore
         else:
+            self.top_color = "#CCE3DE"
             #TODO change button animation back when not hovering anymore
             return
 
-def blit_text(surface, text, pos, font, color=pygame.Color('black')):
-    words = [word.split(' ') for word in text.splitlines()]  # 2D array where each row is a list of words.
-    space = font.size(' ')[0]  # The width of a space.
-    max_width, max_height = surface.get_size()
-    x, y = pos
-    for line in words:
-        for word in line:
-            word_surface = font.render(word, 0, color)
-            word_width, word_height = word_surface.get_size()
-            if x + word_width >= max_width:
-                x = pos[0]  # Reset the x.
-                y += word_height  # Start on new row.
-            surface.blit(word_surface, (x, y))
-            x += word_width + space
-        x = pos[0]  # Reset the x.
-        y += word_height  # Start on new row.
+def other_game_labels():
+    #Flop
+    flop = controller.get_flop()
+    flopfont = pygame.font.Font(None, 64)
+    text_surface = flopfont.render(flop, True, (255, 255, 255))
+    ptext.draw(flop, (0, 750), color=pygame.Color('black'), background="white", fontsize=38)
+    #Pot
+    pot = "Pot: $"+ str(controller.get_pot())
+    potfont = flopfont = pygame.font.Font(None, 64)
+    ptext.draw(pot, (0, 780), color=pygame.Color('black'), background="white", fontsize=38)
+    #Player $$$
+    player1 = "Player 1: $"  + str(controller.get_player_money("p1"))
+    playerfont = flopfont = pygame.font.Font(None, 64)
+    ptext.draw(player1, (0, 500), color=pygame.Color('black'), background="white", fontsize=38)
+    player2 = "Player 2: $"  + str(controller.get_player_money("p2"))
+    ptext.draw(player2, (0, 530), color=pygame.Color('black'), background="white", fontsize=38)
+
+def draw_comm_cards():
+    card1 = pygame.image.load('./images/cards/spades/2-spades.PNG') #LOAD background
+    card1 = pygame.transform.scale(card1, (400, 400)) #SCALE background
+    screen.blit(bg, (350,400)) #places image onto screen
 
 # PYGAME setup
 pygame.init()
-def box_text(surface, font, x_start, x_end, y_start, text, colour):
-    x = x_start
-    y = y_start
-    words = text.split(' ')
-
-    for word in words:
-        word_t = font.render(word, True, colour)
-        if word_t.get_width() + x <= x_end:
-            surface.blit(word_t, (x, y))
-            x += word_t.get_width() * 1.1
-        else:
-            y += word_t.get_height() * 1.1
-            x = x_start
-            surface.blit(word_t, (x, y))
-            x += word_t.get_width() * 1.1
 pygame.display.set_caption('AI Poker')
-screen = pygame.display.set_mode((1280, 960)) #1920x1080 or 3072x2304
+screen = pygame.display.set_mode((1280, 960), pygame.RESIZABLE) #1920x1080 or 3072x2304
 clock = pygame.time.Clock()
 gui_font = pygame.font.Font(None, 30)
 running = True
@@ -105,7 +97,7 @@ controller = Controller(GameModel())
 #====================================================
 is_game_started = False #has game started?
 message = " " #message
-bg = pygame.image.load('./images/bg.jpg') #LOAD background
+bg = pygame.image.load('./images/bg-new.png') #LOAD background
 bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
 base_font = pygame.font.Font(None, 32)
 
@@ -125,26 +117,10 @@ while running:
     screen.blit(bg, (0,0)) #places image onto screen
 
     text_surface = base_font.render(message, True, (255, 255, 255))
-    # screen.blit(text_surface, (210,0))
-    # blit_text(text_surface, message, (210, 0), pygame.font.SysFont('Arial', 64))
     ptext.draw(message, (0, 850), color=pygame.Color('black'), background="white")
-    # pygame.QUIT event means the user clickedç X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
 
-    #start game
-    if is_game_started == False:
-        #1 ask for gamemode
-        controller.ask_user_for_gamemode()
-        message = controller.get_message_to_user()
-        print(message)
-        is_game_started = True
-    #if gamemode isn't choosen yet
-    if(controller.get_gamemode() == "N/A"):
-        all_buttons[0].draw() #ai
-        all_buttons[1].draw() #human
-    #if game has started progress game
+
+    #PROGRESS GAME!
     if(controller.get_gamestate != "start" and controller.get_gamemode() != "N/A"):
         controller.progress_game()    
         message = controller.get_message_to_user()
@@ -152,8 +128,46 @@ while running:
         all_buttons[2].draw()
         all_buttons[3].draw()
         all_buttons[4].draw()
+
+        #OTHER GAME LABELS
+        other_game_labels()
+
     if(controller.if_awaiting_input()):
         print("awaiting input")
+
+    # pygame.QUIT event means the user clicked X to close your window
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    #START GAME!
+    if is_game_started == False:
+        #1 ask for gamemode
+        controller.ask_user_for_gamemode()
+        message = controller.get_message_to_user()
+        print(message)
+        is_game_started = True
+    #CHOOSE GAMEMODE
+    if(controller.get_gamemode() == "N/A"):
+        all_buttons[0].draw() #ai
+        all_buttons[1].draw() #human
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ##########################################################################################
     # flip() the display to put your work on screen
     pygame.display.flip()
