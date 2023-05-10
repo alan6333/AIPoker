@@ -32,8 +32,15 @@ class Controller(object):
         def if_awaiting_input(self):
                 return self.game.if_awaiting_input()
         
+        def set_awaiting_input(self, bool):
+                return self.game.set_awaiting_input(bool)
+        
         def betting(self, input):
                 self.game.betting(input)
+                return
+        
+        def input_bet(self, input):
+                self.game.input_bet(input)
                 return
         
         def leave(self):

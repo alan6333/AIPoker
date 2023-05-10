@@ -68,16 +68,16 @@ class GameModel():
           return
       elif self.game_state[0:7] == "BETTING":
          #bet here
-         self.betting("N/A")
+         self.betting(self.input_bet)
          return
 
       elif self.game_state == "leave":
           self.leave()
+          return
       elif self.game_state == "quit":
-         quit()
+          quit()
       else:
          return
-      return 
         
         
     def get_message_to_user(self):
@@ -237,10 +237,19 @@ class GameModel():
              return
          
     def get_gamestate(self):
-       return self.get_gamestate
+       return self.game_state
        
     def if_awaiting_input(self):
        return self.getting_input
+    
+    def set_awaiting_input(self, bool):
+       self.getting_input = bool
+       return
+    
+    def input_bet(self, input):
+       self.input_bet = input
+       return
+
     
     def get_flop(self):
        flop = "Preflop"
@@ -270,8 +279,7 @@ class GameModel():
 #======================================================================================================================
     def leave(self):
        self.game_state = "quit"
-       self.message_to_user = "\n\n\n\n=======================================================================================\n"\
-         + self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+       self.message_to_user = self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
          + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n" + self.get_winner()
        return
     
@@ -293,14 +301,14 @@ class GameModel():
           self.p1.money = self.p1.money + self.pot
           self.message_to_user = self.message_to_user + "\nP1 has a " + p1_hand[0] + "\nP2 has a " + p2_hand[0] + ".\n"\
             + "P1 wins the hand. The pot goes to P1 $" + str(self.pot) + ".\n"\
-            + "==================================================\nNEXT ROUND -----------------------------------\n=================================================="
+            + "\nNEXT ROUND\n"
           return
        #P2 BY HAND
        elif(self.hand_score(p1_hand[0]) < self.hand_score(p2_hand[0])):
           self.p2.money = self.p2.money + self.pot
           self.message_to_user = self.message_to_user + "\nP1 has a " + p1_hand[0] + "\nP2 has a " + p2_hand[0] + ".\n"\
             + "P2 wins the hand. The pot goes to P2 $" + str(self.pot) + ".\n"\
-            + "==================================================\nNEXT ROUND -----------------------------------\n=================================================="
+            + "\nNEXT ROUND\n"
           return
        #TIEBREAKER
        else: #tie
@@ -309,14 +317,14 @@ class GameModel():
                   self.p1.money = self.p1.money + self.pot
                   self.message_to_user = self.message_to_user + "\nP1 has a " + p1_hand[0] + "\nP2 has a " + p2_hand[0] + ".\n"\
                      + "P1 wins the tiebreaker. The pot goes to P1 $" + str(self.pot) + ".\n"\
-                     + "==================================================\nNEXT ROUND -----------------------------------\n=================================================="
+                     + "\nNEXT ROUND\n"
                   return
             #p2 by tiebreaker
             elif(p2_hand[1] > p1_hand[1]):
                self.p2.money = self.p2.money + self.pot
                self.message_to_user = self.message_to_user + "\nP1 has a " + p1_hand[0] + "\nP2 has a " + p2_hand[0] + ".\n"\
                   + "P2 wins the tiebreaker. The pot goes to P2 $" + str(self.pot) + ".\n"\
-                  + "==================================================\nNEXT ROUND -----------------------------------\n=================================================="
+                  + "\nNEXT ROUND\n"
                return
             #tie - split
             else:
@@ -324,7 +332,7 @@ class GameModel():
                self.p2.money = self.p2.money + (self.pot/2)
                self.message_to_user = self.message_to_user + "\nP1 has a " + p1_hand[0] + "\nP2 has a " + p2_hand[0] + ".\n"\
                   + "It is a tie! The pot is split $" + str(self.pot/2) + " each.\n"\
-                  + "==================================================\nNEXT ROUND -----------------------------------\n=================================================="
+                  + "\nNEXT ROUND\n"
                return
        
     def hand_score(self, hand):
@@ -365,7 +373,7 @@ class GameModel():
           + "\n\n\n\n\n\n----==={Pre-Flop Begin}===----\n"
           self.gamemode = "Human"
       else:
-          self.message_to_user = "\nInvalid input, try again.\nPlease a VALID opponent, type 'AI' or 'Human': "      
+          self.message_to_user = "\nInvalid input, try again.\nPlease a VALID opponent, type 'AI' or 'Human': "   
       return
     
     def reset_round(self):
@@ -440,20 +448,19 @@ class GameModel():
       #UTG
       if (self.game_state == "BETTING_warn_showUTG_cards"): #Human
          self.game_state = "BETTING_showUTG_cards"
-         self.message_to_user = "Showing " + self.utg.player_id + " cards in 5 seconds.\n\n\n"
+         self.message_to_user = "Showing " + self.utg.player_id + " cards in 5 seconds.\n\n\n"    
          return
-      if (self.game_state == "BETTING_showUTG_cards"):
+      if (self.game_state == "BETTING_showUTG_cards"):            
          self.game_state = "BETTING_betUTG"
          self.show_cards(self.utg)
          self.show_player_hand(self.utg)
+         self.getting_input = True
          return
       if (self.game_state == "BETTING_betUTG"):
-         if(self.getting_input == False):
-
-            self.getting_input = True
+         if(self.getting_input != True):
+            self.utg_bet(input)
+            self.getting_input = False
             return
-         self.utg_bet(input)
-         self.getting_input = False
          return
       #Second Better
       if (self.game_state == "BETTING_warn_show2nd_cards"): #Human
@@ -464,14 +471,13 @@ class GameModel():
          self.game_state = "BETTING_bet2nd"
          self.show_cards(self.second_better)
          self.show_player_hand(self.second_better)
+         self.getting_input = True
          return
       if (self.game_state == "BETTING_bet2nd"):
-         if(self.getting_input == False):
-
-            self.getting_input = True
+         if(self.getting_input != True):
+            self.second_bet(input)
+            self.getting_input = False
             return
-         self.second_bet(input)
-         self.getting_input = False
          return
       #Apply Winner
       if (self.game_state == "BETTING_Showdown"):
@@ -480,15 +486,13 @@ class GameModel():
          return
     
     def show_cards(self, player):
-      self.message_to_user =  self.show_player_hand(player) + "\n\nMake your bet!\n"\
-          + "Options: 1[Leave] 2[Fold] 3[Check] 4[Bet (amount)]\n"
+      self.message_to_user =  self.show_player_hand(player) + "\n\nMake your bet!\n"
 
-    def utg_bet(self, uinput):
-      uinput ="-1"
+    def utg_bet(self, input):
+      uinput = input
       #if player wants to leave, leave
       if(uinput == str(1)):
-        self.message_to_user = "\n\n\n\n=======================================================================================\n"\
-            + self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+        self.message_to_user = self.get_utg() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
             + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n" + self.get_winner()
         self.game_state = "leave"
         return
@@ -498,7 +502,7 @@ class GameModel():
          self.second_better.money = self.second_better.money + self.pot # other player wins pot
          self.message_to_user = "\n\n" + str(self.get_utg()) + " folded, "\
          + str(self.get_second_bet()) + " wins the hand!\n"\
-         + str(self.get_second_bet()) + " wins $" + str(self.pot) + ".\n\n\n\n\n\n" #update message
+         + str(self.get_second_bet()) + " wins $" + str(self.pot) + "." #update message
          self.game_state = "reset_round" # update gamestate to 'reset_round'
          return
       #if player wants to check
@@ -588,8 +592,7 @@ class GameModel():
 
       #if player wants to leave, leave
       if(uinput == str(1)):
-        self.message_to_user = "\n\n\n\n=======================================================================================\n"\
-            + self.get_second_bet() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+        self.message_to_user = self.get_second_bet() + " left the table, game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
             + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n" + self.get_winner()
         self.game_state = "leave"
         return
@@ -599,7 +602,7 @@ class GameModel():
          self.second_better.money = self.utg.money + self.pot # utg wins pot
          self.message_to_user = "\n\n" + str(self.get_second_bet()) + " folded, "\
          + str(self.get_utg()) + " wins the hand!\n"\
-         + str(self.get_utg()) + " wins $" + str(self.pot) + ".\n\n\n\n\n\n" #update message
+         + str(self.get_utg()) + " wins $" + str(self.pot) #update message
          self.game_state = "reset_round" #gamestate to reset round
          return
       #if player wants to check
