@@ -1,5 +1,5 @@
 # Example file showing a circle moving on screen
-import pygame, sys, time
+import pygame, sys, time, pygame_gui
 import ptext
 from Controller import Controller
 from Backend import GameModel
@@ -11,7 +11,7 @@ class Button:
         self.type = type
         #top rectangle
         self.top_rect = pygame.Rect(pos, (width,height)) 
-        self.top_color = "#CCE3DE"
+        self.top_color = "#4F695E"
         
         #text
         self.text_surf = gui_font.render(text, True, "#FFFFFF")
@@ -23,10 +23,11 @@ class Button:
         self.check_click()
 
     def check_click(self):
+        global bet_button
         mouse_pos = pygame.mouse.get_pos()
         #if hovering button
         if (self.top_rect.collidepoint(mouse_pos)):
-            self.top_color = "#A4C3B2"
+            self.top_color = "#35463F"
             #TODO change stuff here when hovering
             #status of mouse being clicked
             #if mouse is being clicked
@@ -35,7 +36,7 @@ class Button:
             #if player is not pressing button anymore (released)
             else:
                 #if button was pressed in the first place
-                self.top_color = "#6B9080"
+                self.top_color = "#35463F"
                 if (self.pressed == True):
                     if(self.type == "Human" or self.type=="AI"):
                         if(self.type == "Human"):
@@ -47,17 +48,26 @@ class Button:
                         controller.config_game()
                         message = controller.get_message_to_user()
                         print(message)
-                        self.pressed == False
+                    
+                    #1 Leave, 2 Fold, 3 Check, 4 Bet
                     if(self.type == "1" or self.type == "2" or self.type == "3"):
                         controller.input_bet(self.type)
                         message = controller.get_message_to_user()
                         print(message)
                         controller.set_awaiting_input(False)
-                        return
+                    if(self.type == "4"):
+                        if(bet_button == False):
+                            TEXT_INPUT.enable()
+                            bet_button = True
+                        else:
+                            TEXT_INPUT.disable()
+                            bet_button = False
+
+                    self.pressed = False
 
         #if mouse isn't hovering the button anymore
         else:
-            self.top_color = "#CCE3DE"
+            self.top_color = "#4F695E"
             #TODO change button animation back when not hovering anymore
             return
 
@@ -86,7 +96,11 @@ def draw_comm_cards():
 # PYGAME setup
 pygame.init()
 pygame.display.set_caption('AI Poker')
-screen = pygame.display.set_mode((1280, 960), pygame.RESIZABLE) #1920x1080 or 3072x2304
+global bet_button
+global progress_game
+MANAGER = pygame_gui.UIManager((1280, 960))
+TEXT_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1180,900),(100,60)), manager=MANAGER, object_id="#main_text_entry")
+screen = pygame.display.set_mode((1280, 960), pygame.RESIZABLE, ) #1920x1080 or 3072x2304
 clock = pygame.time.Clock()
 gui_font = pygame.font.Font("Milenia.ttf", 30)
 running = True
@@ -98,48 +112,68 @@ message = " " #message
 bg = pygame.image.load('./images/bg-new.png') #LOAD background
 bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
 base_font = pygame.font.Font("Milenia.ttf", 32)
-
+bet_button = False
+progress_game = False
 all_buttons = []
 all_buttons.append(Button('AI', 200, 60, (793,450), "AI"))
 all_buttons.append(Button('Human', 200, 60, (396,450), "Human"))
 all_buttons.append(Button('Leave', 200, 60, (0,0), "1"))
 all_buttons.append(Button('Fold', 200, 60, (540,900), "2"))
 all_buttons.append(Button('Check', 200, 60, (760,900), "3"))
-# all_buttons.append(Button('Bet', 200, 60, (0,0), "Betting"))
+all_buttons.append(Button('Bet', 200, 60, (980,900), "4"))
+all_buttons.append(Button('->', 200, 30, (673,900), "progress_game"))
 #
 #Main loop of the game
 #if 'running' stops then the window closes.
 #
 while running:
+    print(controller.get_gamestate())
     #place bg on screen
     screen.blit(bg, (0,0)) #places image onto screen
 
-    #PROGRESS GAME!
-    if(controller.get_gamestate() != "start" and controller.get_gamemode() != "N/A" and controller.if_awaiting_input() == False):
-        if (controller.get_gamestate() == "quit"):
-            pygame.time.wait(3000)
+    #PROGRESS GAME! and controller.if_awaiting_input() == False
+    if(controller.get_gamestate() != "start" and controller.get_gamemode() != "N/A"):
+        # if (controller.get_gamestate() == "quit"):
+            # pygame.time.wait(5000)
         controller.progress_game()    
         message = controller.get_message_to_user()
-        #OTHER GAME LABELS
-        other_game_labels()
-
-    #IF WAITING FOR INPUT, WAIT
-    if(controller.if_awaiting_input() == True):
         all_buttons[2].draw()
         all_buttons[3].draw()
         all_buttons[4].draw()
-        print("awaiting input")
+        all_buttons[5].draw()
         #OTHER GAME LABELS
         other_game_labels()
+        if ("BETTING_bet" != controller.get_gamestate()[:11] and "BETTING" == controller.get_gamestate()[:7]):
+            pygame.time.wait(10000)
+
+    #IF WAITING FOR INPUT, WAIT
+    # if(controller.if_awaiting_input() == True):
+    #     all_buttons[2].draw()
+    #     all_buttons[3].draw()
+    #     all_buttons[4].draw()
+    #     print("awaiting input")
+    #     #OTHER GAME LABELS
+    #     other_game_labels()
 
 
 
 
     # pygame.QUIT event means the user clicked X to close your window
+    UI_REFRESH_RATE = clock.tick(60)/1000
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+        if (event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#main_text_entry"):
+            controller.input_bet("4 " + str(event.text))
+            message = controller.get_message_to_user()
+            print(message)
+            controller.set_awaiting_input(False)
+
+        MANAGER.process_events(event)
+    MANAGER.update(UI_REFRESH_RATE)
+    if(bet_button == True):
+        MANAGER.draw_ui(screen)
     #START GAME!
     if is_game_started == False:
         #1 ask for gamemode

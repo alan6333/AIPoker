@@ -43,14 +43,13 @@ class GameModel():
        self.comm_cards = []
        self.bet = 0
        self.getting_input = False
+       self.input_bet_choice = "N/A"
 
     #game config method
     def config_game(self):
 
         #change game state
         self.game_state = "reset_round"
-        #set message to user
-        self.message_to_user = " "
         #randomize blinds
         self.randomize_blinds()
         return
@@ -68,7 +67,7 @@ class GameModel():
           return
       elif self.game_state[0:7] == "BETTING":
          #bet here
-         self.betting(self.input_bet)
+         self.betting(self.input_bet_choice)
          return
 
       elif self.game_state == "leave":
@@ -195,23 +194,17 @@ class GameModel():
           p2_bet = 50
        #P1 and P2 have no money
        if (self.p1.money < p1_bet and self.p2.money < p2_bet):
-          self.message_to_user += "Player 1 & p2 have no money" \
-          + "\n\n\n\n=======================================================================================\n"\
-            + "Its a tie, the game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+          self.message_to_user += "Player 1 & p2 have no money" + "Its a tie, the game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
             + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n"
           self.game_state = "leave"
        #P1 has no money
        elif (self.p1.money < p1_bet and self.p2.money >= p2_bet):
-          self.message_to_user += "Player 1 has no money" \
-          + "\n\n\n\n=======================================================================================\n"\
-            + "Player 2 wins! The game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+          self.message_to_user += "Player 1 has no money" + "Player 2 wins! The game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
             + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n"
           self.game_state = "leave"
        #P2 has no money
        elif (self.p1.money >= p1_bet and self.p2.money < p2_bet):
-          self.message_to_user += "Player 2 has no money" \
-          + "\n\n\n\n=======================================================================================\n"\
-            + "Player 1 wins! The game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
+          self.message_to_user += "Player 2 has no money" + "Player 1 wins! The game is over.\n" + "Player 1 earnings: $" + str(self.get_player_money(self.p1))\
             + "\nPlayer 2 earnings: $" + str(self.get_player_money(self.p2)) + "\n"
           self.game_state = "leave"
        #everyone has money, do the bets
@@ -247,7 +240,7 @@ class GameModel():
        return
     
     def input_bet(self, input):
-       self.input_bet = input
+       self.input_bet_choice = input
        return
 
     
@@ -365,12 +358,10 @@ class GameModel():
     def choose_logistics(self, uinput):
       self.gamemode = uinput
       if (uinput == "AI"):
-          self.message_to_user = "\n\nReady to play against: AI!\nThe Dealer is done Shuffling\n"\
-          + "\n\n\n\n\n\n----==={Pre-Flop Begin}===----\n"
+          self.message_to_user = "\n\nReady to play against: AI!\nThe Dealer is done Shuffling\n"
           self.gamemode = "AI"
       elif (uinput == "Human"):
-          self.message_to_user = "\n\n\nReady to play against: Human!\nThe Dealer is done shuffling.\n"\
-          + "\n\n\n\n\n\n----==={Pre-Flop Begin}===----\n"
+          self.message_to_user = "\n\n\nReady to play against: Human!\nThe Dealer is done shuffling.\n"
           self.gamemode = "Human"
       else:
           self.message_to_user = "\nInvalid input, try again.\nPlease a VALID opponent, type 'AI' or 'Human': "   
@@ -409,7 +400,7 @@ class GameModel():
        #switch blinds
        self.switch_blinds()
        self.game_state = "blinds_bet"
-       self.message_to_user = "Round begins...\nDealt two cards to each player.\n"
+       self.message_to_user = "Round begins...\nDealt two cards to each player...\n"
 
     def betting(self, input):
       #SHOW X COMMUNITY CARDS
@@ -435,60 +426,61 @@ class GameModel():
          if(self.gamemode=="Human"):
             #do human
             self.game_state = "BETTING_warn_showUTG_cards"
-            if(len(self.comm_cards)>0):
-               self.message_to_user = self.show_comm_cards()
-            else:
-               self.message_to_user = " "
-            return
          else:
             #do AI
             self.game_state = "BETTING_showUTG_cards"
-            self.message_to_user = self.show_comm_cards()
-            return
+         self.message_to_user = "Showing community deck!\n"
       #UTG
       if (self.game_state == "BETTING_warn_showUTG_cards"): #Human
          self.game_state = "BETTING_showUTG_cards"
-         self.message_to_user = "Showing " + self.utg.player_id + " cards in 5 seconds.\n\n\n"    
+         self.message_to_user = "Showing " + self.utg.player_id + " cards in 5 seconds...\n\n\n"    
          return
       if (self.game_state == "BETTING_showUTG_cards"):            
          self.game_state = "BETTING_betUTG"
-         self.show_cards(self.utg)
+         self.show_cards(self.utg, self.utg.blind)
          self.show_player_hand(self.utg)
          self.getting_input = True
          return
       if (self.game_state == "BETTING_betUTG"):
-         if(self.getting_input != True):
-            self.utg_bet(input)
-            self.getting_input = False
+         # if(self.getting_input != True):
+         if(input == "N/A"):
             return
+         self.utg_bet(input)
+         self.input_bet_choice = "N/A"
+         self.getting_input = False
          return
+         # return
       #Second Better
       if (self.game_state == "BETTING_warn_show2nd_cards"): #Human
          self.game_state = "BETTING_show2nd_cards"
-         self.message_to_user = "Showing " + self.second_better.player_id + " cards in 5 seconds.\n\n\n"
+         self.message_to_user = "Showing " + self.second_better.player_id + " cards in 5 seconds...\n\n\n"
          return
       if (self.game_state == "BETTING_show2nd_cards"):
          self.game_state = "BETTING_bet2nd"
-         self.show_cards(self.second_better)
+         self.show_cards(self.second_better, self.second_better.blind)
          self.show_player_hand(self.second_better)
          self.getting_input = True
          return
       if (self.game_state == "BETTING_bet2nd"):
-         if(self.getting_input != True):
-            self.second_bet(input)
-            self.getting_input = False
+         # if(self.getting_input == True):
+         if(input == "N/A"):
             return
+         self.second_bet(input)
+         self.input_bet_choice = "N/A"
+         self.getting_input = False
          return
+         # return
       #Apply Winner
       if (self.game_state == "BETTING_Showdown"):
          self.showdown()
          self.game_state = "reset_round"
          return
     
-    def show_cards(self, player):
-      self.message_to_user =  self.show_player_hand(player) + "\n\nMake your bet!\n"
+    def show_cards(self, player, blind):
+      self.message_to_user =  blind + " Blind (" + player.player_id + "):" + self.show_player_hand(player) + "\n\nMake your bet!\n"
 
     def utg_bet(self, input):
+      print(input)
       uinput = input
       #if player wants to leave, leave
       if(uinput == str(1)):
@@ -519,7 +511,7 @@ class GameModel():
                self.utg.move = "Check" #player move is check
                self.pot = self.pot + self.bet  # update pot with the minimum bet
                self.utg.money = self.utg.money - self.bet #bet the minimum possible
-               self.message_to_user = "\n\n" + str(self.get_utg()) + " checked $" + str(self.bet) + ".\n" #update message
+               self.message_to_user =self.message_to_user+ "\n\n" + str(self.get_utg()) + " checked $" + str(self.bet) + ".\n" #update message
             else: #all in check
                self.utg.move = "All-In" #player move is check
                self.pot = self.pot + self.utg.money  # update pot all ur money
