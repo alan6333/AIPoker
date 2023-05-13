@@ -97,7 +97,6 @@ def draw_comm_cards():
 pygame.init()
 pygame.display.set_caption('AI Poker')
 global bet_button
-global progress_game
 MANAGER = pygame_gui.UIManager((1280, 960))
 TEXT_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1180,900),(100,60)), manager=MANAGER, object_id="#main_text_entry")
 screen = pygame.display.set_mode((1280, 960), pygame.RESIZABLE, ) #1920x1080 or 3072x2304
@@ -113,7 +112,6 @@ bg = pygame.image.load('./images/bg-new.png') #LOAD background
 bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
 base_font = pygame.font.Font("Milenia.ttf", 32)
 bet_button = False
-progress_game = False
 all_buttons = []
 all_buttons.append(Button('AI', 200, 60, (793,450), "AI"))
 all_buttons.append(Button('Human', 200, 60, (396,450), "Human"))
@@ -121,7 +119,6 @@ all_buttons.append(Button('Leave', 200, 60, (0,0), "1"))
 all_buttons.append(Button('Fold', 200, 60, (540,900), "2"))
 all_buttons.append(Button('Check', 200, 60, (760,900), "3"))
 all_buttons.append(Button('Bet', 200, 60, (980,900), "4"))
-all_buttons.append(Button('->', 200, 30, (673,900), "progress_game"))
 #
 #Main loop of the game
 #if 'running' stops then the window closes.
@@ -143,8 +140,7 @@ while running:
         all_buttons[5].draw()
         #OTHER GAME LABELS
         other_game_labels()
-        if ("BETTING_bet" != controller.get_gamestate()[:11] and "BETTING" == controller.get_gamestate()[:7]):
-            pygame.time.wait(10000)
+        # if ("BETTING_bet" != controller.get_gamestate()[:11] and "BETTING" == controller.get_gamestate()[:7]):
 
     #IF WAITING FOR INPUT, WAIT
     # if(controller.if_awaiting_input() == True):
@@ -189,7 +185,7 @@ while running:
 
     #write to message box
     text_surface = base_font.render(message, True, (255, 255, 255))
-    ptext.draw(message, (0, 750), color=pygame.Color('black'), background="white", fontname="Milenia.ttf", fontsize=24)
+    ptext.draw(message, (0, 700), color=pygame.Color('black'), background="white", fontname="Milenia.ttf", fontsize=24)
 
 
 
