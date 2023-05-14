@@ -55,3 +55,6 @@ class Controller(object):
         
         def get_player_money(self, player):
                 return self.game.get_player_cash(player)
+        
+        def get_second_better_move(self):
+                return self.game.get_second_better_move()

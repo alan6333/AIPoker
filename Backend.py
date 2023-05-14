@@ -267,6 +267,9 @@ class GameModel():
        else:
           return self.p2.money
        
+    def get_second_better_move(self):
+       return self.second_better.move
+       
 #======================================================================================================================
     def leave(self):
        self.game_state = "quit"
@@ -420,7 +423,9 @@ class GameModel():
             self.game_state = "leave"
             return
          self.bet = 0
-         
+          #reset players moves
+         self.p1.move = "NA"
+         self.p2.move = "NA"
          if(self.gamemode=="Human"):
             #do human
             self.game_state = "BETTING_warn_showUTG_cards"
@@ -437,6 +442,13 @@ class GameModel():
          self.show_player_hand(self.utg)
          self.getting_input = True
          return
+      if(self.game_state == "BETTING_betUTG_match"):
+         if(input == "N/A"):
+            return
+         self.utg_bet(input)
+         self.input_bet_choice = "N/A"
+         self.getting_input = False
+         return
       if (self.game_state == "BETTING_betUTG"):
          # if(self.getting_input != True):
          if(input == "N/A"):
@@ -445,7 +457,6 @@ class GameModel():
          self.input_bet_choice = "N/A"
          self.getting_input = False
          return
-         # return
       #Second Better
       if (self.game_state == "BETTING_warn_show2nd_cards"): #Human
          self.game_state = "BETTING_show2nd_cards"
@@ -502,6 +513,8 @@ class GameModel():
             self.pot = self.pot + self.utg.money # put all utg money in pot
             self.utg.money = 0 # update utg money to 0
             self.message_to_user = str(self.get_utg()) + " is all in $" + str(self.bet) + "!\n" #update message
+            if(self.game_state == "BETTING_betUTG_match"):
+               self.game_state = "BETTING_Showdown"
             print("utg is all in")
          else:
          #Normal check
@@ -510,6 +523,9 @@ class GameModel():
                self.pot = self.pot + self.bet  # update pot with the minimum bet
                self.utg.money = self.utg.money - self.bet #bet the minimum possible
                self.message_to_user = str(self.get_utg()) + " checked $" + str(self.bet) + ".\n" #update message
+               if (self.game_state == "BETTING_betUTG_match"):
+                  # self.game_state = "BETTING_show_comm_cards_utg"
+                  self.flop = self.flop + 1
                print("utg normal check")
             else: #all in check
                self.utg.move = "All-In" #player move is check
@@ -521,13 +537,17 @@ class GameModel():
             self.message_to_user = self.get_second_bet() + " is all in!\nShowdown begins!" #showdown
             self.game_state = "BETTING_Showdown"
          else:
+            if (self.game_state == "BETTING_betUTG_match"):
+               self.game_state = "BETTING_show_comm_cards_utg"
+               self.message_to_user = self.message_to_user + "Matched second better, "+ self.get_utg() + " bets next!\n"
+               return
             self.message_to_user = self.message_to_user + self.get_second_bet() + " bets next!\n"
             if(self.gamemode == "Human"):
                self.game_state = "BETTING_warn_show2nd_cards"
             else:
                self.game_state = "BETTING_show2nd_cards"
       #if player wants to bet
-      if(uinput[:1] == str(4)):
+      if(uinput[:1] == str(4) and self.game_state != "BETTING_betUTG_match"):
          try:
             new_bet = int(uinput[2:]) #parse bet
          except:
@@ -660,8 +680,7 @@ class GameModel():
             #cannot raise when utg is already all in
             self.message_to_user = "Cannot raise when " + self.get_utg()+ " is already all in"
             self.game_state = "BETTING_bet2nd"
-            self.flop = self.flop + 1
-            print("2nd better all in bet")
+            print("utg is all in bet")
             return
          else:
             #TRYING TO BET MORE THAN YOU HAVE
@@ -673,19 +692,19 @@ class GameModel():
                self.second_better.move = 'All-In' #update move
                self.pot = self.pot + self.second_better.money # add $ to pot
                self.bet = new_bet # new bet is how much player put in
-               self.message_to_user = str(self.get_second_bet()) + " went all in $" + str(self.second_better.money) + "\n"\
+               self.message_to_user = str(self.get_second_bet()) + " checked and is all in, $" + str(self.second_better.money) + "\n"\
                   + self.get_utg() + " bets next!\n"
                self.second_better.money = 0 #subtract $ from player
                self.flop = self.flop + 1
                print("2nd better all in by check")
                self.game_state = "BETTING_show_comm_cards_utg"
             else: #normal bet
-               print("2nd better normal bet")
                self.second_better.move = 'Bet' #update move
                self.pot = self.pot + new_bet # add $ to pot
                self.second_better.money = self.second_better.money - new_bet #subtract $ from player
                self.bet = new_bet # new bet is how much player put in
-               self.message_to_user = str(self.get_second_bet()) + " bet" + str(new_bet) + "!\n"\
+               self.message_to_user = str(self.get_second_bet()) + " bet $" + str(new_bet) + "!\n"\
                   + self.get_utg() + " bets next!\n"
-               self.flop = self.flop + 1
-               self.game_state = "BETTING_show_comm_cards_utg" # round is not over so loop to get UTG to bet again
+               self.show_cards(self.utg, self.utg.blind)
+               self.game_state = "BETTING_betUTG_match" # round is not over so loop to get UTG to bet again
+               print("2nd better normal bet")

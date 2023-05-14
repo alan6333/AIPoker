@@ -137,7 +137,8 @@ while running:
         all_buttons[2].draw()
         all_buttons[3].draw()
         all_buttons[4].draw()
-        all_buttons[5].draw()
+        if(controller.get_second_better_move() != "Bet"):
+            all_buttons[5].draw()
         #OTHER GAME LABELS
         other_game_labels()
         # if ("BETTING_bet" != controller.get_gamestate()[:11] and "BETTING" == controller.get_gamestate()[:7]):
@@ -168,7 +169,7 @@ while running:
 
         MANAGER.process_events(event)
     MANAGER.update(UI_REFRESH_RATE)
-    if(bet_button == True):
+    if(bet_button == True and controller.get_second_better_move() != "Bet"):
         MANAGER.draw_ui(screen)
     #START GAME!
     if is_game_started == False:
