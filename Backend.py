@@ -61,8 +61,6 @@ class GameModel():
 
       elif self.game_state == "blinds_bet": 
           self.blinds_bet()
-          if(self.game_state == 'leave'):
-             return
           self.game_state = "BETTING_show_comm_cards_utg"
           return
       elif self.game_state[0:7] == "BETTING":
@@ -666,8 +664,6 @@ class GameModel():
             print("2nd better all in bet")
             return
          else:
-            #utg's turn again
-            new_bet = int(uinput[2:]) #parse bet
             #TRYING TO BET MORE THAN YOU HAVE
             if (self.second_better.money < new_bet):
                self.game_state = "BETTING_bet2nd"
