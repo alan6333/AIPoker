@@ -58,3 +58,6 @@ class Controller(object):
         
         def get_second_better_move(self):
                 return self.game.get_second_better_move()
+        
+        def show_comm_cards(self):
+                return self.game.show_comm_cards()

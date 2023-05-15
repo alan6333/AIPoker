@@ -99,7 +99,7 @@ pygame.display.set_caption('AI Poker')
 global bet_button
 MANAGER = pygame_gui.UIManager((1280, 960))
 TEXT_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((1180,900),(100,60)), manager=MANAGER, object_id="#main_text_entry")
-screen = pygame.display.set_mode((1280, 960), pygame.RESIZABLE, ) #1920x1080 or 3072x2304
+screen = pygame.display.set_mode((1480, 1160), pygame.RESIZABLE, ) #1920x1080 or 3072x2304
 clock = pygame.time.Clock()
 gui_font = pygame.font.Font("Milenia.ttf", 30)
 running = True
@@ -109,7 +109,7 @@ controller = Controller(GameModel())
 is_game_started = False #has game started?
 message = " " #message
 bg = pygame.image.load('./images/bg-new.png') #LOAD background
-bg = pygame.transform.scale(bg, (1280, 960)) #SCALE background
+bg = pygame.transform.scale(bg, (1480, 1160)) #SCALE background
 base_font = pygame.font.Font("Milenia.ttf", 32)
 bet_button = False
 all_buttons = []
@@ -119,17 +119,25 @@ all_buttons.append(Button('Leave', 200, 60, (0,0), "1"))
 all_buttons.append(Button('Fold', 200, 60, (540,900), "2"))
 all_buttons.append(Button('Check', 200, 60, (760,900), "3"))
 all_buttons.append(Button('Bet', 200, 60, (980,900), "4"))
+showdown = False
+passedstart = False
 #
 #Main loop of the game
 #if 'running' stops then the window closes.
 #
 while running:
+    if (controller.get_gamestate() == "reset_round" and showdown == False and passedstart==True): #showdown will be false
+        pygame.time.wait(10000)
+        showdown = True
+    if (controller.get_gamestate() != "reset_round"):
+        showdown = False
     print(controller.get_gamestate())
     #place bg on screen
     screen.blit(bg, (0,0)) #places image onto screen
 
     #PROGRESS GAME! and controller.if_awaiting_input() == False
     if(controller.get_gamestate() != "start" and controller.get_gamemode() != "N/A"):
+        passedstart = True
         # if (controller.get_gamestate() == "quit"):
             # pygame.time.wait(5000)
         controller.progress_game()    
@@ -141,7 +149,6 @@ while running:
             all_buttons[5].draw()
         #OTHER GAME LABELS
         other_game_labels()
-        # if ("BETTING_bet" != controller.get_gamestate()[:11] and "BETTING" == controller.get_gamestate()[:7]):
 
     #IF WAITING FOR INPUT, WAIT
     # if(controller.if_awaiting_input() == True):
@@ -184,6 +191,9 @@ while running:
         all_buttons[0].draw() #ai
         all_buttons[1].draw() #human
 
+    #write community cards
+    comm_cards_surface = base_font.render(controller.show_comm_cards(), True, (255, 255, 255))
+    ptext.draw(controller.show_comm_cards(), (450, 600), color=pygame.Color('black'), fontname="Milenia.ttf", fontsize=32)
     #write to message box
     text_surface = base_font.render(message, True, (255, 255, 255))
     ptext.draw(message, (0, 700), color=pygame.Color('black'), background="white", fontname="Milenia.ttf", fontsize=24)
