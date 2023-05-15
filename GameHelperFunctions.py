@@ -49,7 +49,7 @@ def get_player_hand(comm_cards, player_cards):
     all_hand_combinations_0 = copy.deepcopy(all_hand_combinations)
     for combo in all_hand_combinations_0:
         if (check_royal_flush(combo)):
-            return ["Royal Flush", 100] # Royal flush is only hand possible, wins automatically
+            return ["Royal Flush", 14] # Royal flush is only hand possible, wins automatically
         
     #STRAIGHT FLUSH
     #make a list straight_flushes[]
@@ -78,7 +78,7 @@ def get_player_hand(comm_cards, player_cards):
     for combo in all_hand_combinations_2:
         #check if 4 of a kind
         if(check_fourofakind(combo)):
-            return ["Four of a Kind", 0] #strength is 0 because only one person can get a 4 of a kind in a roun
+            return ["Four of a Kind", 9] #strength is 0 because only one person can get a 4 of a kind in a roun
 
     #FULL HOUSE
     all_hand_combinations_3 = copy.deepcopy(all_hand_combinations)
@@ -113,7 +113,7 @@ def get_player_hand(comm_cards, player_cards):
         for straight in all_straights:
             if (straight[1]>straight_winner[1]):
                 straight_winner = straight
-            return straight_winner
+        return straight_winner
         
     #THREEOFAKIND
     all_hand_combinations_6 = copy.deepcopy(all_hand_combinations)
@@ -132,7 +132,7 @@ def get_player_hand(comm_cards, player_cards):
         for tpair in all_twopairs:
             if (tpair[1]>tpair_winner[1]):
                 tpair_winner = tpair
-            return tpair_winner
+        return tpair_winner
 
     #PAIR
     all_pairs = []
@@ -146,7 +146,7 @@ def get_player_hand(comm_cards, player_cards):
         for pair in all_pairs:
             if (pair[1] > pair_winner[1]):
                 pair_winner = pair
-            return pair_winner
+        return pair_winner
 
     #HIGHCARD*
     all_highcards = []

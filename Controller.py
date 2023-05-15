@@ -61,3 +61,6 @@ class Controller(object):
         
         def show_comm_cards(self):
                 return self.game.show_comm_cards()
+
+        def get_player_id(self, player):
+                return self.game.get_player_id(player)

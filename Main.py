@@ -76,16 +76,16 @@ def other_game_labels():
     flop = controller.get_flop()
     flopfont = pygame.font.Font("Milenia.ttf", 64)
     text_surface = flopfont.render(flop, True, (255, 255, 255))
-    ptext.draw(flop, (0, 650), color=pygame.Color('black'), background="white", fontsize=24, fontname="Milenia.ttf")
+    ptext.draw(flop, (0, 650), color=pygame.Color('black'), background="white", fontsize=30, fontname="Milenia.ttf")
     #Pot
     pot = "Pot: $"+ str(controller.get_pot())
     potfont = pygame.font.Font("Milenia.ttf", 64)
     ptext.draw(pot, (0, 600), color=pygame.Color('black'), background="white", fontsize=24, fontname="Milenia.ttf")
     #Player $$$
-    player1 = "Player 1: $"  + str(controller.get_player_money("p1"))
+    player1 = str(controller.get_player_id("p1")) + ": $"  + str(controller.get_player_money("p1"))
     playerfont = flopfont = pygame.font.Font("Milenia.ttf", 64)
     ptext.draw(player1, (0, 400), color=pygame.Color('black'), background="white", fontsize=24, fontname="Milenia.ttf")
-    player2 = "Player 2: $"  + str(controller.get_player_money("p2"))
+    player2 = str(controller.get_player_id("p2")) +": $"  + str(controller.get_player_money("p2"))
     ptext.draw(player2, (0, 450), color=pygame.Color('black'),fontname="Milenia.ttf", background="white", fontsize=24)
 
 def draw_comm_cards():
@@ -113,8 +113,8 @@ bg = pygame.transform.scale(bg, (1480, 1160)) #SCALE background
 base_font = pygame.font.Font("Milenia.ttf", 32)
 bet_button = False
 all_buttons = []
-all_buttons.append(Button('AI', 200, 60, (793,450), "AI"))
-all_buttons.append(Button('Human', 200, 60, (396,450), "Human"))
+all_buttons.append(Button('AI', 200, 60, (560,580), "AI"))
+all_buttons.append(Button('Human', 200, 60, (780,580), "Human"))
 all_buttons.append(Button('Leave', 200, 60, (0,0), "1"))
 all_buttons.append(Button('Fold', 200, 60, (540,900), "2"))
 all_buttons.append(Button('Check', 200, 60, (760,900), "3"))
@@ -138,8 +138,6 @@ while running:
     #PROGRESS GAME! and controller.if_awaiting_input() == False
     if(controller.get_gamestate() != "start" and controller.get_gamemode() != "N/A"):
         passedstart = True
-        # if (controller.get_gamestate() == "quit"):
-            # pygame.time.wait(5000)
         controller.progress_game()    
         message = controller.get_message_to_user()
         all_buttons[2].draw()
@@ -149,18 +147,6 @@ while running:
             all_buttons[5].draw()
         #OTHER GAME LABELS
         other_game_labels()
-
-    #IF WAITING FOR INPUT, WAIT
-    # if(controller.if_awaiting_input() == True):
-    #     all_buttons[2].draw()
-    #     all_buttons[3].draw()
-    #     all_buttons[4].draw()
-    #     print("awaiting input")
-    #     #OTHER GAME LABELS
-    #     other_game_labels()
-
-
-
 
     # pygame.QUIT event means the user clicked X to close your window
     UI_REFRESH_RATE = clock.tick(60)/1000
@@ -193,7 +179,7 @@ while running:
 
     #write community cards
     comm_cards_surface = base_font.render(controller.show_comm_cards(), True, (255, 255, 255))
-    ptext.draw(controller.show_comm_cards(), (450, 600), color=pygame.Color('black'), fontname="Milenia.ttf", fontsize=32)
+    ptext.draw(controller.show_comm_cards(), (450, 700), color=pygame.Color('black'), fontname="Milenia.ttf", fontsize=32)
     #write to message box
     text_surface = base_font.render(message, True, (255, 255, 255))
     ptext.draw(message, (0, 700), color=pygame.Color('black'), background="white", fontname="Milenia.ttf", fontsize=24)
