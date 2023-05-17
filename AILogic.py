@@ -35,10 +35,10 @@ def player_money_multiplier_evaluator(player_money):
 
     Our return multiplier will be between 0 and 1, 0% of your $ or 100% of your money
     '''
-    player_fraction_of_money = player_money/5900
+    player_fraction_of_money = player_money/5800 
     #subtract from 1 to make the losing player more risky not the winner
     #multiply result by .7 to make overall bet less harsh
-    multiplier = (1 - player_fraction_of_money) * .7
+    multiplier = 1 - player_fraction_of_money
     return multiplier
 
 def hand_confidence_eval_helper(hand, flop):
@@ -82,26 +82,29 @@ def hand_confidence_eval_helper(hand, flop):
       else:
         hand_mult = .05
 
-   strength_mult = (hand[1]/13) * .1 #mult .1 so confidence doesn't surpass a better hand
-   return hand_mult + strength_mult
+   strength_mult = (hand[1]/14) * .01 #mult .1 so confidence doesn't surpass a better hand
+   if(hand_mult + strength_mult > 1): #rf
+      return 1
+   else:
+      return hand_mult + strength_mult
 
 def hand_confidence_multiplier_evaluator(player_cards, comm_cards_dc):
     comm_cards = copy.deepcopy(comm_cards_dc)
 
     #if PREFLOP (up to a pair)
     if(len(comm_cards) == 0):
-        comm_cards.append(Card("x", "x", -1))
-        comm_cards.append(Card("x", "x", -1))
-        comm_cards.append(Card("x", "x", -1))
-        comm_cards.append(Card("x", "x", -1))
-        comm_cards.append(Card("x", "x", -1))
+        comm_cards.append(Card("aa", "aa", -11))
+        comm_cards.append(Card("bb", "bb", -22))
+        comm_cards.append(Card("cc", "cc", -33))
+        comm_cards.append(Card("dd", "dd", -44))
+        comm_cards.append(Card("ee", "ee", -55))
     #if FLOP (up to a royal flush)
     elif(len(comm_cards) == 3):
-        comm_cards.append(Card("x", "x", -1))
-        comm_cards.append(Card("x", "x", -1))
+        comm_cards.append(Card("ff", "ff", -66))
+        comm_cards.append(Card("gg", "gg", -77))
     #if TURN (up to a royal flush)
     elif(len(comm_cards) == 4):
-        comm_cards.append(Card("x", "x", -1))
+        comm_cards.append(Card("hh", "hh", -88))
 
     hand = get_player_hand(comm_cards, player_cards)
     return hand_confidence_eval_helper(hand, len(comm_cards))
