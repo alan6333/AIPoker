@@ -379,7 +379,8 @@ class GameModel():
       return
     
     def reset_round(self):
-       
+       self.p1.money = 2900
+       self.p2.money = 2900
        #reset card deck
        self.card_deck = [] 
        self.card_deck = make_card_deck(self.card_deck)

@@ -1,4 +1,4 @@
-import copy
+import copy, random
 from GameHelperFunctions import get_player_hand
 
 class Card:
@@ -17,6 +17,10 @@ def format_money_to_bet(money_to_bet, current_bet):
    #+50 is because it's kinda redundant to bet a small amount more than current bet
    #if you don't want to bet more than the current bet => FOLD
    if (money_to_bet < current_bet):
+      if(current_bet > money_to_bet + 150):
+        #no bluff randomness
+        if(random.randint(0,3)==0):
+           return "3"
       return "2"
    #if you want to bet exactly the current bet => CHECK
    if (money_to_bet <= current_bet + 50):
@@ -56,9 +60,9 @@ def hand_confidence_eval_helper(hand, flop):
    #PREFLOP
    if(flop==0):
       if(hand[0] == "Pair"):
-        hand_mult = .1
+        hand_mult = .4
       else:
-        hand_mult = .05
+        hand_mult = .2
    #FLOP
    if(flop==3 or flop ==4 or flop == 5):
       if(hand[0] == "Royal Flush"):
@@ -66,21 +70,21 @@ def hand_confidence_eval_helper(hand, flop):
       if(hand[0] == "Straight Flush"):
         hand_mult = .9
       if(hand[0] == "Four of a Kind"):
-        hand_mult = .7
+        hand_mult = .8
       if(hand[0] == "Full House"):
-        hand_mult = .6
+        hand_mult = .7
       if(hand[0] == "Flush"):
-        hand_mult = .5
+        hand_mult = .65
       if(hand[0] == "Straight"):
-        hand_mult = .4
+        hand_mult = .6
       if(hand[0] == "Three of a Kind"):
-        hand_mult = .3
+        hand_mult = .5
       if(hand[0] == "Two Pair"):
-        hand_mult = .2
+        hand_mult = .4
       if(hand[0] == "Pair"):
-        hand_mult = .1
+        hand_mult = .3
       else:
-        hand_mult = .05
+        hand_mult = .2
 
    strength_mult = (hand[1]/14) * .01 #mult .1 so confidence doesn't surpass a better hand
    if(hand_mult + strength_mult > 1): #rf
@@ -140,3 +144,15 @@ def ai_make_decision(player_cards, comm_cards, player_money, current_bet):
 
     
     return format_money_to_bet(money_to_bet, current_bet)
+
+def unknowncards_chances(comm_cards_dc):
+   comm_cards = copy.deepcopy(comm_cards_dc)
+   #PREFLOP (0 known comm cards) 50c7 combos = 99884400
+   hands_count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] #0 rf, 1 sf, 2 4oaK, 3 fh, 4 f, 5 s, 6 3k, 7 2p, 8 p, 9 hc
+
+
+   #FLOP (3 known comm cards) 47c4 combos = 178365
+
+   #TURN (4 known comm cards) 46c3 combos = 15180
+
+   #RIVER (all knwon comm cards) 45c2 combos = 990
