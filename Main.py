@@ -159,6 +159,8 @@ while running:
             message = controller.get_message_to_user()
             print(message)
             controller.set_awaiting_input(False)
+            TEXT_INPUT.disable()
+            bet_button = False
 
         MANAGER.process_events(event)
     MANAGER.update(UI_REFRESH_RATE)

@@ -402,12 +402,12 @@ class GameModel():
        #reset flop
        self.flop = 0
        #switch utg
-       if(self.utg == self.p1):
-          self.utg = self.p2
-          self.second_better = self.p1
-       else:
-          self.utg = self.p1
-          self.second_better = self.p2
+      #  if(self.utg == self.p1):
+      #     self.utg = self.p2
+      #     self.second_better = self.p1
+      #  else:
+      #     self.utg = self.p1
+      #     self.second_better = self.p2
        #switch blinds
        self.switch_blinds()
        self.game_state = "blinds_bet"
@@ -641,7 +641,7 @@ class GameModel():
       #if player wants to fold, fold
       if(uinput == str(2)):
          self.second_better.move = "Fold" #player move is 'Fold'
-         self.second_better.money = self.utg.money + self.pot # utg wins pot
+         self.utg.money = self.utg.money + self.pot # utg wins pot
          self.message_to_user = str(self.get_second_bet()) + " folded, "\
          + str(self.get_utg()) + " wins the hand!\n"\
          + str(self.get_utg()) + " wins $" + str(self.pot) #update message
@@ -684,7 +684,7 @@ class GameModel():
          #next flop
          else:
             self.message_to_user = self.message_to_user + self.get_utg() + " bets next!\n"\
-                  + "\n\nMake your bet!"
+                  + "\n\nMake your bet!\n"
             self.game_state = "BETTING_show_comm_cards_utg" #second better turn
       #if player wants to bet
       if(uinput[:1] == str(4)):
